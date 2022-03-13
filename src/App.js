@@ -14,11 +14,9 @@ function App() {
   // Requests access to the user's META MASK WALLET
   // https://metamask.io
   async function requestAccount() {
-    console.log('Requesting account...');
 
     // ❌ Check if Meta Mask Extension exists 
     if (window.ethereum) {
-      console.log('detected');
       try {
 
         const accounts = await window.ethereum.request({
@@ -33,35 +31,50 @@ function App() {
           // balance is a BigNumber (in wei); format is as a sting (in ether)
           let etherString = ethers.utils.formatEther(balance) + " ETH";
 
-          console.log("Balance: " + etherString);
           setBal(etherString);
         });
       } catch (error) {
-        console.log('Error connecting...');
-        setAddress(0)
+        alert('Error connecting...');
+        setAddress(-1)
       }
 
     } else {
       alert('Meta Mask not detected');
-      setAddress(0)
+      setAddress(-1)
     }
   }
 
   // Create a provider to interact with a smart contract
   async function connectWallet() {
-    if (typeof window.ethereum !== 'undefined' && address == 0) {
-      await requestAccount();
+    if (address == 0) {
+      if (typeof window.ethereum !== 'undefined') {
+        await requestAccount();
+
+      }
+      else setAddress(-1)
 
     }
+
+  }
+
+  async function disconnectWallet() {
+    window.location.reload();
+
+    if (typeof window.ethereum !== 'undefined') {
+    }
+
   }
 
   return (
     <div className="App">
       <header className="App-header">
-        <h3>Wallet: {address}</h3>
-        <h3>Balance: {bal}</h3>
-        <button
-          onClick={connectWallet}> {address == 0 ? 'Connect Wallet' : 'Connected'}</button>
+        <h3>Wallet: {address == -1 ? 'Error' : (address ? address : 'N/A')}</h3>
+        <h3>Balance: {address ? bal : 'N/A'}</h3>
+        <button disabled={address}
+          onClick={connectWallet}> {address == -1 ? 'Error' : address == 0 ? 'Connect Wallet' : 'Connected'}</button>
+        <br />
+        <button disabled={address == 0}
+          onClick={disconnectWallet}>Disconnect</button>
       </header>
     </div>
   );
